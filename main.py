@@ -1,4 +1,5 @@
 # Python
+import json
 from uuid import UUID
 from datetime import date, datetime
 from typing import Optional, List
@@ -9,7 +10,7 @@ from pydantic import BaseModel, EmailStr, fields
 from pydantic import Field
 
 # FastAPI
-from fastapi import FastAPI, status
+from fastapi import FastAPI, status, Body
 
 
 app = FastAPI()
@@ -31,12 +32,14 @@ class User(UserBase):
    first_name: str = Field(
       ...,
       min_length=1,
-      max_length=50
+      max_length=50,
+      example="Saul"
    )
    last_name: str = Field(
       ...,
       min_length=1,
-      max_length=50
+      max_length=50,
+      example="Perez"
    )
    birth_date: Optional[date] = Field(default=None)
 
@@ -69,7 +72,7 @@ class Tweet(BaseModel):
    summary="Register a User",
    tags=["Auth", "Users"]
 )
-def signup():
+def signup(user: UserRegister = Body(...)):
    """
    Singup a user
 
@@ -85,9 +88,17 @@ def signup():
       -email: Emailstr
       -first_name: str
       -last_name: str
-      -birth_date: str
+      -birth_date: date
    """
-
+   with open("users.json", "r+", encoding="utf-8") as f:
+      results = json.loads(f.read())
+      user_dict = user.dict()
+      user_dict["user_id"] = str(user_dict["user_id"])
+      user_dict["birth_date"] = str(user_dict["birth_date"])
+      results.append(user_dict)
+      f.seek(0)
+      f.write(json.dumps(results))
+      return user
 
 
 ### Login a user
