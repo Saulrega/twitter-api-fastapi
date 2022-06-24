@@ -1,1 +1,1 @@
-# twitter-apy-fastapi
+# twitter-api-fastapi
